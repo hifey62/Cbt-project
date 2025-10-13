@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 const Login = () => {
  
     const [formData, setFormData] = useState({
@@ -9,10 +10,40 @@ const Login = () => {
 
     const [error, setError] = useState({});
     const [isloading, setisLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
 
-        const handleSubmit = (e) => {   
+    const validation = () => {
+        let newErrors = {};
+        if (!formData.email.trim()) newErrors.email = "Email is required";
+        if (!formData.password.trim()) newErrors.password = "Password is required";
+        setError(newErrors);
+        return Object.keys(newErrors).length === 0;
+    }
+
+        const handleSubmit = async (e) => {   
             e.preventDefault();
-            console.log(formData);
+            console.log(" i am formDara", formData);
+
+            try{
+
+            if(!validation()){
+                return ;
+            }
+                setisLoading(true);
+                const response =await fetch(`http://localhost:3001/users?email=${formData.email}&password=${formData.password}`);
+                const data = await response.json();
+                console.log("i am data", data);
+                if(data.length === 0){
+                    setError({general: "Invalid email or password"});
+                    setisLoading(false);
+                    return;
+                }
+                setError({});
+                setisLoading(false);
+                setSuccess(true);
+            }catch(err){
+                console.log(err);
+            }
         }
         const handleChange = (e) => {
             setFormData({
@@ -79,12 +110,14 @@ const Login = () => {
           >
             {isloading ? "please wait...." : "Log In"}
           </button>
+          {success && <span className="text-green-500">Login successful!</span>}
          <span className="text-red-500">{error.general}</span>
           <p className="text-center text-gray-500 text-sm">
             Don't have an account?{" "}
-            <a href="#" className="text-blue-600 hover:underline">
-             SignUp
-            </a>
+            <Link to="/signup" className="text-blue-600 hover:underline">
+                Sign up
+            </Link>
+           
           </p>
         </form>
       </div>

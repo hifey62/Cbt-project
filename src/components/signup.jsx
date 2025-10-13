@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ const Signup = () => {
   });
   const [error, setError] = useState({});
   const [isloading, setisLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -31,13 +33,11 @@ const Signup = () => {
     if (!formData.password.trim()) newErrors.password = "Password is required";
 
     setError(newErrors);
-    console.log("i am errors", error);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
 
     if (!validation()) {
       return Error;
@@ -46,6 +46,18 @@ const Signup = () => {
     setisLoading(true);
 
     try {
+
+      const existingUserResponse = await fetch(`http://localhost:3001/users?email=${formData.email}`);
+      console.log("Existing user response:", existingUserResponse);
+      const existingUsers = await existingUserResponse.json();
+      console.log("Existing users data:", existingUsers);
+      if (existingUsers.length > 0) {
+        setError({ email: 'Email is already registered.' });
+        setisLoading(false);
+        return;
+      }
+    
+
     const response =  await fetch("http://localhost:3001/users",{
         method: "POST",
         headers:{
@@ -60,6 +72,7 @@ const Signup = () => {
       }
    
     const newUser = await response.json();
+      setSuccess(true); 
     console.log("Form submitted successfully:", formData);
       setFormData({
         name: "",
@@ -69,7 +82,7 @@ const Signup = () => {
       setError({});
       setisLoading(false);
     } catch (err) {
-      console.log("Error submitting form:", err);
+    
       setError({ general: 'Signup failed. Please try again.' });
       setisLoading(false);
     }
@@ -99,7 +112,7 @@ const Signup = () => {
           <label className="flex flex-col gap-2 text-gray-700 font-medium">
             Name
             <input
-              type="namr"
+              type="name"
               className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               placeholder="Enter your email"
               name="name"
@@ -143,12 +156,13 @@ const Signup = () => {
           >
             {isloading ? "submiting...." : "Sign Up"}
           </button>
+          {success && <span className="text-green-500">Signup successful!</span>}
          <span className="text-red-500">{error.general}</span>
           <p className="text-center text-gray-500 text-sm">
             Already have an account?{" "}
-            <a href="#" className="text-blue-600 hover:underline">
-              Log in
-            </a>
+            <Link to="/login" className="text-blue-600 hover:underline">
+                Log in
+            </Link>
           </p>
         </form>
       </div>
