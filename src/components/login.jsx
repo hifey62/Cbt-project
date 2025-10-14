@@ -1,7 +1,13 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/authcontext";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 const Login = () => {
+
+  const { setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
  
     const [formData, setFormData] = useState({
         email: "",
@@ -22,7 +28,7 @@ const Login = () => {
 
         const handleSubmit = async (e) => {   
             e.preventDefault();
-            console.log(" i am formDara", formData);
+          
 
             try{
 
@@ -32,7 +38,7 @@ const Login = () => {
                 setisLoading(true);
                 const response =await fetch(`http://localhost:3001/users?email=${formData.email}&password=${formData.password}`);
                 const data = await response.json();
-                console.log("i am data", data);
+            
                 if(data.length === 0){
                     setError({general: "Invalid email or password"});
                     setisLoading(false);
@@ -41,6 +47,10 @@ const Login = () => {
                 setError({});
                 setisLoading(false);
                 setSuccess(true);
+                setUser(data[0]);
+                navigate("/profile");
+                
+              
             }catch(err){
                 console.log(err);
             }

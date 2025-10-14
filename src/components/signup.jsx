@@ -1,8 +1,18 @@
 import React from "react";
-import { useState } from "react";
+import { useState,useContext , useEffect} from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/authcontext";
+import { useNavigate } from "react-router-dom";
+
+
+
+
+
+
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,6 +36,10 @@ const Signup = () => {
     }
   };
 
+
+
+
+
   const validation = () => {
     let newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required";
@@ -40,40 +54,43 @@ const Signup = () => {
     e.preventDefault();
 
     if (!validation()) {
-      return Error;
+      return;
     }
 
     setisLoading(true);
 
     try {
-
-      const existingUserResponse = await fetch(`http://localhost:3001/users?email=${formData.email}`);
+      const existingUserResponse = await fetch(
+        `http://localhost:3001/users?email=${formData.email}`
+      );
       console.log("Existing user response:", existingUserResponse);
       const existingUsers = await existingUserResponse.json();
       console.log("Existing users data:", existingUsers);
       if (existingUsers.length > 0) {
-        setError({ email: 'Email is already registered.' });
+        setError({ email: "Email is already registered." });
         setisLoading(false);
         return;
       }
-    
 
-    const response =  await fetch("http://localhost:3001/users",{
+      const response = await fetch("http://localhost:3001/users", {
         method: "POST",
-        headers:{
-            "Content-Type": "application/json"
+        headers: {
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
-      }
-    )
+        body: JSON.stringify(formData),
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-   
-    const newUser = await response.json();
-      setSuccess(true); 
-    console.log("Form submitted successfully:", formData);
+
+      const newUser = await response.json();
+      setUser(newUser);
+      setSuccess(true);
+      navigate("/profile");
+     
+     
+      console.log("Form submitted successfully:", formData);
       setFormData({
         name: "",
         email: "",
@@ -82,8 +99,7 @@ const Signup = () => {
       setError({});
       setisLoading(false);
     } catch (err) {
-    
-      setError({ general: 'Signup failed. Please try again.' });
+      setError({ general: "Signup failed. Please try again." });
       setisLoading(false);
     }
   };
@@ -156,12 +172,14 @@ const Signup = () => {
           >
             {isloading ? "submiting...." : "Sign Up"}
           </button>
-          {success && <span className="text-green-500">Signup successful!</span>}
-         <span className="text-red-500">{error.general}</span>
+          {success && (
+            <span className="text-green-500">Signup successful!</span>
+          )}
+          <span className="text-red-500">{error.general}</span>
           <p className="text-center text-gray-500 text-sm">
             Already have an account?{" "}
             <Link to="/login" className="text-blue-600 hover:underline">
-                Log in
+              Log in
             </Link>
           </p>
         </form>
