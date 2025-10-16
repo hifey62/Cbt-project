@@ -6,8 +6,7 @@ const Profile = () => {
   const [selectedTest, setSelectedTest] = useState(null);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [currentDisplayed, setCurrentDisplayed] = useState({});
-  // Add this near your other useState declarations
-const [answers, setAnswers] = useState({});  // Will look like: { "test1-q0": "optionA", "test1-q2": "optionB" }
+  const [answers, setAnswers] = useState({});
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -16,7 +15,6 @@ const [answers, setAnswers] = useState({});  // Will look like: { "test1-q0": "o
         const res = await fetch("http://localhost:3001/tests");
         const data = await res.json();
         setTests(data);
-        console.log("Fetched tests:", data);
       } catch (error) {
         console.log(error);
       }
@@ -25,160 +23,153 @@ const [answers, setAnswers] = useState({});  // Will look like: { "test1-q0": "o
     fetchData();
   }, []);
 
-  useEffect(() => {
-    console.log("Current answers state:", answers);
-  }, [answers]);
-
   const setQuestions = (test) => {
     setSelectedTest(test);
     setCurrentQuestions(test.questions);
-    const firstUnanswered = test.questions.find(q => 
-    answers[`test-${test.id}-q-${q.id}`] === undefined
-  );
-  setCurrentDisplayed(firstUnanswered || test.questions[0]);
+    const firstUnanswered = test.questions.find(
+      (q) => answers[`test-${test.id}-q-${q.id}`] === undefined
+    );
+    setCurrentDisplayed(firstUnanswered || test.questions[0]);
   };
-
-  const testbtn = tests.map((test) => (
-    <button
-      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow m-2 transition duration-200 cursor-pointer"
-      key={test.id}
-      onClick={() => setQuestions(test)}
-    >
-      {test.name}
-    </button>
-  ));
 
   const dispCurrentQuestion = (q) => {
     setCurrentDisplayed(q);
   };
 
-  const questionBtn = currentQuestions.map((q) => (
-    <button
-      key={q.id}
-      className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded m-2 transition duration-200 cursor-pointer"
-      onClick={() => dispCurrentQuestion(q)}
-    >
-      {q.id + 1}
-    </button>
-  ));
+  const getSelectedAnswer = (testId, questionId) => {
+    return answers[`test-${testId}-q-${questionId}`];
+  };
 
-  const getSelectedAnswer = (testId,questionId) =>{
-    return answers[`test-${testId}-q-${questionId}`] || "No answer selected";
-  }
   const computeScore = () => {
-    let scoreEng = 0;
-    let scoreMath = 0;
-    let scoreChem = 0;
     let totalScore = 0;
-    let qListEng = [] ;
-    let qlistMath = [];
-    let qlistChem  = [];
-    tests.forEach((t)=>{
-      if(t.name === "English"){
-        qListEng = t.questions;
-      }else if(t.name === "Mathematics"){
-        qlistMath = t.questions;
-      }else if(t.name === "Chemistry"){
-        qlistChem = t.questions;
-      }
-    })
-    qListEng.forEach((q)=>{
-      const selectedAnswer = getSelectedAnswer(0, q.id);
-      if(selectedAnswer!== undefined && selectedAnswer === q.answer){
-        scoreEng += 1;
-      }
-    })
-    qlistMath.forEach((q)=>{
-      const selectedAnswer = getSelectedAnswer(1, q.id);
-      if(selectedAnswer!== undefined && selectedAnswer === q.answer){
-        scoreMath += 1;
-      }
-    })
-    qlistChem.forEach((q)=>{
-      const selectedAnswer = getSelectedAnswer(2, q.id);  
-      if(selectedAnswer!== undefined && selectedAnswer === q.answer){
-        scoreChem += 1;
-      }
-    })
-    totalScore = scoreEng + scoreMath + scoreChem;
-   
+    tests.forEach((test) => {
+      test.questions.forEach((q) => {
+        const selectedAnswer = getSelectedAnswer(test.id, q.id);
+        if (selectedAnswer && selectedAnswer === q.answer) {
+          totalScore += 1;
+        }
+      });
+    });
     return totalScore;
-    // let score = 0;
-    // const qList = selectedTest ? selectedTest.questions : [];
-
-
-    
-    // qList.forEach((q)=>{
-    //   const selectedAnswer = getSelectedAnswer(test.id, q.id);
-    //   if(selectedAnswer!== undefined && selectedAnswer === q.answer){
-    //     score += 1;
-    //   }
-    // })
-  }
-
-
+  };
 
   return (
-    <div className="bg-whitesmoke text-3xl font-bold">
-      <h1>{user.name}</h1>
-      <div>{testbtn}</div>
-      <div className="m-4 p-4 border-2 border-gray-300 rounded">
-        {
-          
-            <div>
-              <h2 className="text-2xl font-semibold mb-2">
-                Question {currentDisplayed.id + 1}:
-              </h2>
-              <p className="text-lg">{currentDisplayed.questions}</p>
-            
-              <div className="mt-2">
-                {currentDisplayed.options &&
-                  currentDisplayed.options.map((option, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                      <input
-                        type="radio"
-                        id={`option-${currentDisplayed.id}-${index}`}
-                        name={`test-${selectedTest?.id}-question-${currentDisplayed.id}`} // Unique name per question
-                        value={option}
-                        checked={
-                          answers[
-                            `test-${selectedTest?.id}-q-${currentDisplayed.id}`
-                          ] === option
-                        } // React controls checked state
-                        onChange={(e) => {
-                          const questionKey = `test-${selectedTest?.id}-q-${currentDisplayed.id}`;
-                          setAnswers({
-                            ...answers,
-                            [questionKey]: e.target.value,
-                          }); // Update React state
-                        }}
-                        className="mr-2"
-                      />
-                      <label
-                        htmlFor={`option-${currentDisplayed.id}-${index}`}
-                        className="text-base"
-                      >
-                        {option}
-                      </label>
-                    </div>
-                  ))}
-
-              </div>
-            </div>
-        }
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex flex-col items-center py-10 px-4">
+      {/* Header */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-extrabold text-gray-800 mb-2 tracking-tight">
+          Welcome, <span className="text-purple-600">{user?.name}</span>
+        </h1>
+        <p className="text-gray-500 text-lg">
+          Select a subject to begin your test
+        </p>
       </div>
 
-      <div>{questionBtn}</div>
+      {/* Subject Buttons */}
+      <div className="flex flex-wrap justify-center gap-4 mb-8">
+        {tests.map((test) => (
+          <button
+            key={test.id}
+            onClick={() => setQuestions(test)}
+            className={`px-6 py-3 rounded-xl font-semibold text-white shadow-md transition-all duration-300 ${
+              selectedTest?.id === test.id
+                ? "bg-purple-600 scale-105"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
+          >
+            {test.name}
+          </button>
+        ))}
+      </div>
 
-   
-        <button onClick={()=>{
-          const totalScore = computeScore();
-          alert(`Your total score across all tests is: ${totalScore}`);
-        }} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded shadow m-2 transition duration-200 cursor-pointer">
-          Submit
+      {/* Question Card */}
+      {selectedTest && (
+        <div className="w-full max-w-3xl bg-white shadow-lg rounded-2xl p-8 border border-gray-100 transition-all duration-300 hover:shadow-2xl">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            {selectedTest.name} — Question {currentDisplayed.id + 1}
+          </h2>
+          <p className="text-gray-700 text-lg mb-6">
+            {currentDisplayed.questions}
+          </p>
+
+          {/* Options */}
+          <div className="space-y-3">
+            {currentDisplayed.options &&
+              currentDisplayed.options.map((option, index) => {
+                const questionKey = `test-${selectedTest?.id}-q-${currentDisplayed.id}`;
+                const isSelected = answers[questionKey] === option;
+                return (
+                  <label
+                    key={index}
+                    htmlFor={`option-${currentDisplayed.id}-${index}`}
+                    className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                      isSelected
+                        ? "bg-purple-100 border-purple-500 text-purple-700"
+                        : "hover:bg-gray-50 border-gray-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      id={`option-${currentDisplayed.id}-${index}`}
+                      name={`test-${selectedTest?.id}-question-${currentDisplayed.id}`}
+                      value={option}
+                      checked={isSelected}
+                      onChange={(e) =>
+                        setAnswers({
+                          ...answers,
+                          [questionKey]: e.target.value,
+                        })
+                      }
+                      className="mr-3 accent-purple-600 scale-125"
+                    />
+                    {option}
+                  </label>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Buttons */}
+      {selectedTest && (
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {currentQuestions.map((q) => (
+            <button
+              key={q.id}
+              onClick={() => dispCurrentQuestion(q)}
+              className={`w-10 h-10 flex items-center justify-center rounded-full font-semibold transition-all duration-300 shadow-sm ${
+                currentDisplayed.id === q.id
+                  ? "bg-purple-600 text-white scale-110"
+                  : answers[`test-${selectedTest.id}-q-${q.id}`]
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-gray-300 hover:bg-gray-400 text-gray-700"
+              }`}
+            >
+              {q.id + 1}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Submit Button */}
+      {selectedTest && (
+        <button
+          onClick={() => {
+            const totalScore = computeScore();
+            const totalQuestions = tests.reduce(
+              (sum, test) => sum + test.questions.length,
+              0
+            );
+            alert(
+              `Your total score across all tests is: ${totalScore} / ${totalQuestions}`
+            );
+          }}
+          className="mt-10 px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
+        >
+          Submit Test
         </button>
-      </div>
-    
+      )}
+    </div>
   );
 };
 
