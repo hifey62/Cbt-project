@@ -6,6 +6,7 @@ const Profile = () => {
   const [selectedTest, setSelectedTest] = useState(null);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [currentDisplayed, setCurrentDisplayed] = useState({});
+  const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState({});
   const { user } = useContext(AuthContext);
 
@@ -53,6 +54,40 @@ const Profile = () => {
     return totalScore;
   };
 
+  const handleSubmit = async () => {
+    setLoading(true);
+    const totalScore = computeScore();
+    const totalQuestions = tests.reduce(
+      (sum, test) => sum + test.questions.length,
+      0
+    );
+
+    try {
+      const resultData = {
+        userId: user.id,
+        userName: user.name,
+        score: totalScore,
+        date: new Date().toISOString(),
+      };
+      const respose = await fetch("http://localhost:3001/results", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(resultData),
+      });
+      if (!respose.ok) {
+        throw new Error("Failed to save result");
+      }
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
+    }
+
+    alert(
+      `Your total score across all tests is: ${totalScore} / ${totalQuestions}`
+    );
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex flex-col items-center py-10 px-4">
       {/* Header */}
@@ -154,19 +189,11 @@ const Profile = () => {
       {/* Submit Button */}
       {selectedTest && (
         <button
-          onClick={() => {
-            const totalScore = computeScore();
-            const totalQuestions = tests.reduce(
-              (sum, test) => sum + test.questions.length,
-              0
-            );
-            alert(
-              `Your total score across all tests is: ${totalScore} / ${totalQuestions}`
-            );
-          }}
+          onClick={handleSubmit}
+          disabled={loading}
           className="mt-10 px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
         >
-          Submit Test
+          {loading ? " Submitting..." : "Submit Test"}
         </button>
       )}
     </div>
