@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/authcontext";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [tests, setTests] = useState([]);
@@ -9,6 +10,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState({});
   const { user } = useContext(AuthContext);
+  const {setResult} = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +70,7 @@ const Profile = () => {
         userId: user.id,
         userName: user.name,
         score: totalScore,
+        total: totalQuestions,
         date: new Date().toISOString(),
       };
       const respose = await fetch("http://localhost:3001/results", {
@@ -79,10 +83,13 @@ const Profile = () => {
       if (!respose.ok) {
         throw new Error("Failed to save result");
       }
+      setResult(resultData);
       setLoading(false);
+      navigate("/result");
     } catch (err) {
       console.log(err);
     }
+
 
     alert(
       `Your total score across all tests is: ${totalScore} / ${totalQuestions}`
