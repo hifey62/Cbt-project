@@ -56,8 +56,15 @@ const Profile = () => {
     });
     return totalScore;
   };
+ const checkAllAnswered = tests.every((test) =>
+      test.questions.every((q => answers[`test-${test.id}-q-${q.id}`] !== undefined))
+    );
 
   const handleSubmit = async () => {
+    if (!checkAllAnswered) {
+      alert("Please answer all questions before submitting the test.");
+      return;
+    }
     setLoading(true);
     const totalScore = computeScore();
     const totalQuestions = tests.reduce(
@@ -65,6 +72,7 @@ const Profile = () => {
       0
     );
 
+   
     try {
       const resultData = {
         userId: user.id,
@@ -91,9 +99,6 @@ const Profile = () => {
     }
 
 
-    alert(
-      `Your total score across all tests is: ${totalScore} / ${totalQuestions}`
-    );
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex flex-col items-center py-10 px-4">
