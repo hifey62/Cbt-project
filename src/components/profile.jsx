@@ -9,8 +9,9 @@ const Profile = () => {
   const [currentDisplayed, setCurrentDisplayed] = useState({});
   const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState({});
+  const [testCompleted, setTestCompleted] = useState(false);
   const { user } = useContext(AuthContext);
-  const {setResult} = useContext(AuthContext);
+  const { setResult } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,13 +57,15 @@ const Profile = () => {
     });
     return totalScore;
   };
- const checkAllAnswered = tests.every((test) =>
-      test.questions.every((q => answers[`test-${test.id}-q-${q.id}`] !== undefined))
-    );
+  const checkAllAnswered = tests.every((test) =>
+    test.questions.every(
+      (q) => answers[`test-${test.id}-q-${q.id}`] !== undefined
+    )
+  );
 
   const handleSubmit = async () => {
     if (!checkAllAnswered) {
-      alert("Please answer all questions before submitting the test.");
+      setTestCompleted(true);
       return;
     }
     setLoading(true);
@@ -72,7 +75,6 @@ const Profile = () => {
       0
     );
 
-   
     try {
       const resultData = {
         userId: user.id,
@@ -97,8 +99,6 @@ const Profile = () => {
     } catch (err) {
       console.log(err);
     }
-
-
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex flex-col items-center py-10 px-4">
@@ -207,6 +207,45 @@ const Profile = () => {
         >
           {loading ? " Submitting..." : "Submit Test"}
         </button>
+      )}
+
+      {testCompleted && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 transition-all duration-300">
+          <div className="bg-white w-[90%] max-w-md rounded-2xl shadow-2xl p-8 text-center transform scale-100 animate-fadeIn">
+            <div className="mb-4 flex justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-12 w-12 text-green-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8
+              3.582-8 8 3.582 8 8 8z"
+                />
+              </svg>
+            </div>
+
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">
+              Please complete all tests before submitting!
+            </h2>
+
+            <p className="text-gray-500 mb-6">
+              Make sure every test is finished before final submission.
+            </p>
+
+            <button
+              className="bg-red-600 text-white rounded-full py-2 px-6 hover:bg-red-700 transition-all duration-300 shadow-md hover:shadow-lg"
+              onClick={() => setTestCompleted(false)}
+            >
+              Okay, Got it
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
