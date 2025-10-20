@@ -210,7 +210,7 @@ const ResultPage = () => {
                 cursor: "pointer",
                 fontWeight: 600,
               }}
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate("/test")}
             >
               Retake Test
             </button>

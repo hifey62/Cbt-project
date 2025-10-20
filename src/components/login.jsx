@@ -48,7 +48,7 @@ const Login = () => {
                 setisLoading(false);
                 setSuccess(true);
                 setUser(data[0]);
-                navigate("/profile");
+                navigate("/test");
                 
               
             }catch(err){

@@ -87,7 +87,7 @@ const Signup = () => {
       const newUser = await response.json();
       setUser(newUser);
       setSuccess(true);
-      navigate("/profile");
+      navigate("/test");
      
      
       console.log("Form submitted successfully:", formData);
