@@ -28,6 +28,37 @@ const Profile = () => {
     fetchData();
   }, []);
 
+  const Countdown = () => {
+    const [seconds, setSeconds] = useState(60);
+
+    useEffect(() => {
+      const intervalId = setInterval(() => {
+        setSeconds((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalId);
+            handleSubmit();
+            return 0;
+          }
+
+          return prev - 1;
+        });
+      }, 1000); // run every 1 second
+
+      return () => clearInterval(intervalId); // cleanup when unmounted
+    }, []); // depend on seconds
+
+    return (
+      <div className="text-center mt-6 text-red-700 font-medium">
+        Time Remaining: {Math.floor(seconds / 3600).toString()}:
+        {Math.floor((seconds % 3600) / 60)
+          .toString()
+          .padStart(2, "0")}
+        :{(seconds % 60).toString().padStart(2, "0")}
+      </div>
+    );
+  };
+
+  let timer = Countdown();
   const setQuestions = (test) => {
     setSelectedTest(test);
     setCurrentQuestions(test.questions);
@@ -177,7 +208,6 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Navigation Buttons */}
       {selectedTest && (
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           {currentQuestions.map((q) => (
@@ -197,6 +227,33 @@ const Profile = () => {
           ))}
         </div>
       )}
+
+      {/* Timer - fixed top-right */}
+      <div className="fixed top-6 right-6 z-50">
+        <div className="flex items-center gap-3 bg-white/80 backdrop-blur-md shadow-2xl border border-white/30 rounded-2xl px-5 py-3 transition-transform hover:scale-105 hover:shadow-purple-200 duration-300">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 blur-sm opacity-40"></div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-6 h-6 text-purple-700 relative z-10"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 8v4l2 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="text-lg font-bold text-red tracking-wide">
+            {timer}
+          </div>
+        </div>
+      </div>
 
       {/* Submit Button */}
       {selectedTest && (
