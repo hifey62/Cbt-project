@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/authcontext";
 import { useNavigate } from "react-router-dom";
 
-const Profile = () => {
+const Test = () => {
   const [tests, setTests] = useState([]);
   const [selectedTest, setSelectedTest] = useState(null);
   const [currentQuestions, setCurrentQuestions] = useState([]);
@@ -308,4 +308,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Test;
