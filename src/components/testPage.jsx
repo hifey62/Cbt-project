@@ -1,79 +1,82 @@
-// import { useParams } from "react-router-dom";
-// import { useEffect, useState } from "react";
+import { use, useEffect,useState } from "react";
 
-// const TestPage = () => {
-//   const { id } = useParams();
-//   const [test, setTest] = useState(null);
-//   const [selectedAnswers, setSelectedAnswers] = useState({});
-//   const [score, setScore] = useState(null);
 
-//   useEffect(() => {
-//     const fetchTest = async () => {
-//       try {
-//         const res = await fetch(`http://localhost:3001/tests/${id}`);
-//         const data = await res.json();
-//         setTest(data);
-//       } catch (error) {
-//         console.log(error);
-//       }
-//     };
+const TestPage = () => {
+const [test , setTest] = useState([]);
+const[selectedTest,setSelectedTest]= useState({})
+const [currentQuestion, setCurrentQuestion]= useState([])
 
-//     fetchTest();
-//   }, [id]);
+useEffect(()=>{
+   
+    const FetchTest = async () =>{
+       try{
+       const response = await fetch("http://localhost:3001/tests");
+       const data = await response.json();
 
-//   const handleSelect = (questionId, option) => {
-//     setSelectedAnswers({ ...selectedAnswers, [questionId]: option });
-//   };
+       if(!response.ok){
+        return Error;
+       }
+       setTest(data)
+       }catch(error){
+         console.log(error)
+       }
+    }
 
-//   const handleSubmit = () => {
-//     let count = 0;
-//     test.questions.forEach((q) => {
-//       if (selectedAnswers[q.id] === q.answer) count++;
-//     });
-//     setScore(count);
-//   };
+    FetchTest();
+},[])
 
-//   if (!test) return <p className="text-center mt-10">Loading test...</p>;
 
-//   return (
-//     <div className="p-6">
-//       <h2 className="text-2xl font-bold mb-4">{test.name} Test</h2>
-//       {test.questions.map((q) => (
-//         <div key={q.id} className="mb-6 border-b pb-4">
-//           <p className="font-semibold mb-2">
-//             {parseInt(q.id) + 1}. {q.questions}
-//           </p>
-//           <div className="flex flex-col space-y-2">
-//             {q.options.map((option, index) => (
-//               <label key={index} className="flex items-center">
-//                 <input
-//                   type="radio"
-//                   name={`question-${q.id}`}
-//                   value={option}
-//                   onChange={() => handleSelect(q.id, option)}
-//                   checked={selectedAnswers[q.id] === option}
-//                   className="mr-2"
-//                 />
-//                 {option}
-//               </label>
-//             ))}
-//           </div>
-//         </div>
-//       ))}
-//       <button
-//         onClick={handleSubmit}
-//         className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded mt-4"
-//       >
-//         Submit
-//       </button>
+useEffect(()=>{
+console.log("i am", currentQuestion)
+},[currentQuestion])
 
-//       {score !== null && (
-//         <p className="mt-4 text-xl font-bold">
-//           Your Score: {score} / {test.questions.length}
-//         </p>
-//       )}
-//     </div>
-//   );
-// };
+const handleSelectedTest = (test) =>{
+setSelectedTest(test)
 
-// export default TestPage;
+setCurrentQuestion(test.questions)
+console.log(test.questions)
+}
+
+
+const questionBtn = currentQuestion?.map((question)=>{
+    return <div key={question.id} 
+  className="w-10 h-10 flex items-center justify-center rounded-full font-semibold transition-all duration-300 shadow-sm "
+   >
+    {question.id+1}
+    </div>
+})
+
+
+
+const testBtn = test?.map((test)=>{
+    return <button 
+    key={test.id} 
+    onClick={()=> handleSelectedTest(test)}
+    style={{
+        marginLeft:"50px",
+        marginTop:"50px",
+        backgroundColor:"green",
+        padding:"10px",
+        color:"white",
+        borderRadius:"8px",
+        width:"150px",
+        cursor:"pointer"
+    }}>{test.name}</button>
+})
+
+
+ 
+  return (
+   <div>
+     <div className="mt-8 flex flex-wrap justify-center gap-3"> {testBtn}</div>
+    
+     <div className="mt-8 flex flex-wrap justify-center gap-3">
+         {questionBtn}
+     </div>
+    
+    
+   </div>
+  );
+};
+
+export default TestPage;

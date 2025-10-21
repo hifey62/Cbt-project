@@ -14,6 +14,7 @@ const Test = () => {
   const { setResult } = useContext(AuthContext);
   const navigate = useNavigate();
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -27,7 +28,8 @@ const Test = () => {
 
     fetchData();
   }, []);
-
+ 
+  //Timer Function
   const Countdown = () => {
     const [seconds, setSeconds] = useState(60);
 
