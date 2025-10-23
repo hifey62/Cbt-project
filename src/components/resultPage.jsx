@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const ResultPage = () => {
   const { result } = useContext(AuthContext);
+  console.log(result);
   const navigate = useNavigate();
   if (!result) {
     return (

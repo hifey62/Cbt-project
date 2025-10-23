@@ -10,8 +10,10 @@ const Test = () => {
   const [loading, setLoading] = useState(false);
   const [answers, setAnswers] = useState({});
   const [testCompleted, setTestCompleted] = useState(false);
+  const [timerUp,setTimerUp] = useState(false);
   const { user } = useContext(AuthContext);
   const { setResult } = useContext(AuthContext);
+  
   const navigate = useNavigate();
 
 
@@ -31,14 +33,14 @@ const Test = () => {
  
   //Timer Function
   const Countdown = () => {
-    const [seconds, setSeconds] = useState(60);
+    const [seconds, setSeconds] = useState(10);
 
     useEffect(() => {
       const intervalId = setInterval(() => {
         setSeconds((prev) => {
           if (prev <= 1) {
+            setTimerUp(true)
             clearInterval(intervalId);
-            handleSubmit();
             return 0;
           }
 
@@ -48,6 +50,10 @@ const Test = () => {
 
       return () => clearInterval(intervalId); // cleanup when unmounted
     }, []); // depend on seconds
+
+     useEffect(() => {
+      if(timerUp === true) handleSubmit()
+     },[timerUp])
 
     return (
       <div className="text-center mt-6 text-red-700 font-medium">
@@ -97,7 +103,7 @@ const Test = () => {
   );
 
   const handleSubmit = async () => {
-    if (!checkAllAnswered) {
+    if (!checkAllAnswered && !timerUp) {
       setTestCompleted(true);
       return;
     }
@@ -107,6 +113,7 @@ const Test = () => {
       (sum, test) => sum + test.questions.length,
       0
     );
+     
 
     try {
       const resultData = {
